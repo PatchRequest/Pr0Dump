@@ -1,0 +1,6 @@
+USERNAMEPRO=
+PASSWORD=
+DBHOST=localhost
+DBUSER=root
+DBPASS=mypass
+DBNAME=pr0dump
