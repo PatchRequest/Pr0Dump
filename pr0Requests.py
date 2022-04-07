@@ -27,12 +27,18 @@ def getNextXPosts(startId,cookie):
 
 def getTagsOfPost(id,cookie):
     x = requests.get('https://pr0gramm.com/api/items/info?itemId={}'.format(id),cookies=cookie)
-    tags = x.json()['tags']
+    try:
+        tags = x.json()['tags']
+    except:
+        tags = []
     print("[+] Found {} Tags for Post {}".format(len(tags),id))
     return tags
 
 def getCommentsOfPost(id,cookie):
     x = requests.get('https://pr0gramm.com/api/items/info?itemId={}'.format(id),cookies=cookie)
-    comments = x.json()['comments']
+    try:
+        comments = x.json()['comments']
+    except:
+        comments = []
     print("[+] Found {} Comments for Post {}".format(len(comments),id))
     return comments
