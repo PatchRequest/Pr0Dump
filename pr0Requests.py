@@ -42,3 +42,16 @@ def getCommentsOfPost(id,cookie):
         comments = []
     print("[+] Found {} Comments for Post {}".format(len(comments),id))
     return comments
+
+def getTagsAndCommentsOfPost(id,cookie):
+    x = requests.get('https://pr0gramm.com/api/items/info?itemId={}'.format(id),cookies=cookie)
+    try:
+        tags = x.json()['tags']
+    except:
+        tags = []
+    try:
+        comments = x.json()['comments']
+    except:
+        comments = []
+    print("[+] Found {} Tags and {} Comments for Post {}".format(len(tags),len(comments),id))
+    return tags,comments
