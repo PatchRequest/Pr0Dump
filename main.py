@@ -6,6 +6,7 @@ from helper import loginUser,registerPost
 from dbstuff import *
 from pr0Requests import *
 import time
+import json
 
 
 def main():
@@ -22,13 +23,12 @@ def main():
     x = loginUser(USERNAME, PASSWORD)
 
     latestID = getLatestPostID(x.cookies)
-    latestID = 4080832 
+    latestID = 5156562
     nextPosts = getNextXPosts(latestID,x.cookies)
 
     while latestID > 2:
         
         for post in nextPosts:
-
             try:
                 tags, comments = getTagsAndCommentsOfPost(post['id'],x.cookies)
                 authorData = getUserDetails(post['user'],x.cookies)
@@ -38,9 +38,11 @@ def main():
                 print("[-] Error with post: " + str(post['id']))
                 print(e)
                 with open("error.txt", "a") as myfile:
-                    myfile.write(str(post['id']) + " " + str(e) + post + "\n")
+                    try:
+                        myfile.write(str(post['id']) + " " + str(e) + json.dumps(post) + "\n")
+                    except:
+                        pass
                 continue
-
 
         latestID = nextPosts[-1]['id']
 
@@ -53,8 +55,6 @@ def main():
                 myfile.write(str(e) + "\n")
             time.sleep(600)
             nextPosts = getNextXPosts(latestID,x.cookies)
-
-
 
 
 def loadEnv():

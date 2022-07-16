@@ -19,7 +19,6 @@ def solveCaptche():
     print("[*] Requesting Captcha")
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
-
     }
     x = requests.get('https://pr0gramm.com/api/user/captcha',headers=headers)
     xJson = x.json()
@@ -32,34 +31,20 @@ def solveCaptche():
     return token, captchaSolution
 
 def registerPost(mydb,authorData,authorID,post,tags,comments,badges):
-    # Check if user exists
-    if checkForUser(mydb,authorData):
-        # Update user information
-        updateUser(mydb,authorData)
-    else:
-        # Insert user information
-        print("[+] New User, ID: " + str(authorID))
-        insertUser(mydb,authorData)
 
-    # Check if post exists
-    if checkForPost(mydb,post):
-        # Update post information
-        updatePost(mydb,post)
-    else:
-        # Insert post information
-        print("[+] New Post, ID: " + str(post['id']))
-        insertPost(mydb,post)
+    insertOrUpdateUser(mydb,authorData)
+    print("[+] Updated User, ID: " + str(authorID))
+
+
+    insertOrUpdatePost(mydb,post)
+    print("[+] Updated Post, ID: " + str(post['id']))
+
 
     # For every comment
     for comment in comments:
-        # Check if comment exists
-        if checkForComment(mydb,comment):
-            # Update comment information
-            updateComment(mydb,comment)
-        else:
-            # Insert comment information
-            print("[+] New Comment, ID: " + str(comment['id']))
-            insertComment(mydb,comment,post['id'],authorID)
+        insertOrUpdateComment(mydb,comment,post['id'],authorID)
+        print("[+] Updated Comment, ID: " + str(comment['id']))
+
     # For every tag
     for tag in tags:
         tagId = 0
@@ -73,14 +58,9 @@ def registerPost(mydb,authorData,authorID,post,tags,comments,badges):
             tagId = getIdFortagName(mydb,tag)
             print("[+] New Tag, ID: " + str(tagId))
 
-        # Check if tag is already connected to post
-        if checkForConnectionTagToPost(mydb,tagId,post['id']):
-            # Update tag connection
-            updateConnectionTagToPost(mydb,tagId,post['id'],tag['confidence'])
-        else:
-            # Insert tag connection
-            print("[+] New Connection Tag to Post, ID: " + str(tagId))
-            connectTagToPost(mydb,tagId,post['id'],tag['confidence'])
+        connectOrUpdateTagToPost(mydb,tagId,post['id'],tag['confidence'])
+        print("[+] Updated Connection Tag to Post, ID: " + str(tagId))
+
     # For every badge
     for badge in badges:
         badgeId = 0

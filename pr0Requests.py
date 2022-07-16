@@ -11,7 +11,9 @@ def getUserDetails(name,cookie):
 def getLatestPostID(cookie):
 
     x = requests.get('https://pr0gramm.com/api/items/get?flags=15',cookies=cookie)
+    
     xJson = x.json()
+    print(xJson)
     xArray = xJson['items']
     print("[+] Current highest ID is: {}".format(xArray[0]['id']))
     return xArray[0]['id']

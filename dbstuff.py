@@ -26,59 +26,6 @@ def setupDB(dbcon):
             dbcur.close()
         
 
-def insertUser(dbcon,user):
-    id = user['user']['id']
-    currentName = user['user']['name']
-    registered = user['user']['registered']
-    score = user['user']['score']
-    uploadCount = user['uploadCount']
-
-    dbcur = dbcon.cursor()
-    dbcur.execute("""
-        INSERT INTO users 
-        (id,currentName,registered,uploadCount,score)
-        VALUES (%s,%s,%s,%s,%s)
-        """,(id,currentName,registered,uploadCount,score))
-    dbcon.commit()
-    dbcur.close()
-        
-def insertPost(dbcon,post):
-
-    id = post['id']
-    userId = post['userId']
-    up = post['up']
-    down = post['down']
-    created = post['created']
-    width = post['width']
-    height = post['height']
-    audio = post['audio']
-    flags = post['flags']
-
-    dbcur = dbcon.cursor()
-    dbcur.execute("""
-        INSERT INTO posts 
-        (id,userId,up,down,created,width,height,audio,flags)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-        """,(id,userId,up,down,created,width,height,audio,flags))
-    dbcon.commit()
-    dbcur.close()
-
-def insertComment(dbcon,comment,postId,userId):
-    id = comment['id']
-    parentId = comment['parent']
-    up = comment['up']
-    down = comment['down']
-    created = comment['created']
-    content = comment['content']
-
-    dbcur = dbcon.cursor()
-    dbcur.execute("""
-        INSERT INTO comments 
-        (id,postId,parentId,userId,up,down,created,content)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-        """,(id,postId,parentId,userId,up,down,created,content))
-    dbcon.commit()
-    dbcur.close()
 
 def insertTag(dbcon,tag):
     
@@ -116,15 +63,6 @@ def getIdForBadgeByImage(dbcon,badge):
     dbcur.close()
     return id
 
-def connectTagToPost(dbcon,tagId,postId,confidence):
-    dbcur = dbcon.cursor()
-    dbcur.execute("""
-        INSERT INTO post_tags
-        (postId,tagId,confidence)
-        VALUES (%s,%s,%s)
-        """,(postId,tagId,confidence))
-    dbcon.commit()
-    dbcur.close()
 
 def connectBadgeToUser(dbcon,badgeId,userId):
 
@@ -151,33 +89,6 @@ def checkForUser(dbcon,user):
     dbcur.close()
     return False
 
-def checkForPost(dbcon,post):
-    #check if post exists
-    dbcur = dbcon.cursor()
-    dbcur.execute("""
-        SELECT COUNT(*)
-        FROM posts
-        WHERE id = %s
-        """,[post['id']])
-    if dbcur.fetchone()[0] == 1:
-        dbcur.close()
-        return True
-    dbcur.close()
-    return False
-
-def checkForComment(dbcon,comment):
-    #check if comment exists
-    dbcur = dbcon.cursor()
-    dbcur.execute("""
-        SELECT COUNT(*)
-        FROM comments
-        WHERE id = %s
-        """,[comment['id']])
-    if dbcur.fetchone()[0] == 1:
-        dbcur.close()
-        return True
-    dbcur.close()
-    return False
 
 def checkForTag(dbcon,tag):
     #check if tag exists
@@ -218,19 +129,6 @@ def checkForBadge(dbcon,badge):
     dbcur.close()
     return False
 
-def checkForConnectionTagToPost(dbcon,tagId,postId):
-    #check if connection exists
-    dbcur = dbcon.cursor()
-    dbcur.execute("""
-        SELECT COUNT(*)
-        FROM post_tags
-        WHERE postId = %s AND tagId = %s
-        """,(postId,tagId))
-    if dbcur.fetchone()[0] == 1:
-        dbcur.close()
-        return True
-    dbcur.close()
-    return False
 
 def checkForConnectionBadgeToUser(dbcon,badgeId,userId):
     #check if connection exists
@@ -246,58 +144,8 @@ def checkForConnectionBadgeToUser(dbcon,badgeId,userId):
     dbcur.close()
     return False    
 
-def updateUser(dbcon,user):
-    id = user['user']['id']
-    currentName = user['user']['name']
-    registered = user['user']['registered']
-    score = user['user']['score']
-    uploadCount = user['uploadCount']
 
-    dbcur = dbcon.cursor()
-    dbcur.execute("""
-        UPDATE users
-        SET currentName = %s, registered = %s, score = %s, uploadCount = %s
-        WHERE id = %s
-        """,(currentName,registered,score,uploadCount,id))
-    dbcon.commit()
-    dbcur.close()
 
-def updatePost(dbcon,post):
-    id = post['id']
-    userId = post['userId']
-    up = post['up']
-    down = post['down']
-    created = post['created']
-    width = post['width']
-    height = post['height']
-    audio = post['audio']
-    flags = post['flags']
-
-    dbcur = dbcon.cursor()
-    dbcur.execute("""
-        UPDATE posts
-        SET userId = %s, up = %s, down = %s, created = %s, width = %s, height = %s, audio = %s, flags = %s
-        WHERE id = %s
-        """,(userId,up,down,created,width,height,audio,flags,id))
-    dbcon.commit()
-    dbcur.close()
-
-def updateComment(dbcon,comment):
-    id = comment['id']
-    parentId = comment['parent']
-    up = comment['up']
-    down = comment['down']
-    created = comment['created']
-    content = comment['content']
-
-    dbcur = dbcon.cursor()
-    dbcur.execute("""
-        UPDATE comments
-        SET parentId = %s, up = %s, down = %s, created = %s, content = %s
-        WHERE id = %s
-        """,(parentId,up,down,created,content,id))
-    dbcon.commit()
-    dbcur.close()
 
 def updateConnectionTagToPost(dbcon,tagId,postId,confidence):
     
@@ -320,3 +168,71 @@ def getAuthorIdByName(dbcon,user):
     id = dbcur.fetchone()[0]
     dbcur.close()
     return id
+
+
+def insertOrUpdateUser(dbcon,user):
+    id = user['user']['id']
+    currentName = user['user']['name']
+    registered = user['user']['registered']
+    score = user['user']['score']
+    uploadCount = user['uploadCount']
+    dbcur = dbcon.cursor()
+    dbcur.execute("""
+        INSERT INTO users 
+        (id,currentName,registered,uploadCount,score)
+        VALUES (%s,%s,%s,%s,%s)
+        ON DUPLICATE KEY UPDATE currentName = VALUES(currentName), uploadCount = VALUES(uploadCount), score = VALUES(score)
+        """,(id,currentName,registered,uploadCount,score))
+    dbcon.commit()
+    dbcur.close()
+
+def insertOrUpdatePost(dbcon,post):
+
+    id = post['id']
+    userId = post['userId']
+    up = post['up']
+    down = post['down']
+    created = post['created']
+    width = post['width']
+    height = post['height']
+    audio = post['audio']
+    flags = post['flags']
+
+    dbcur = dbcon.cursor()
+    dbcur.execute("""
+        INSERT INTO posts 
+        (id,userId,up,down,created,width,height,audio,flags)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        ON DUPLICATE KEY UPDATE up = VALUES(up), down = VALUES(down), created = VALUES(created), width = VALUES(width), height = VALUES(height), audio = VALUES(audio), flags = VALUES(flags)
+        """,(id,userId,up,down,created,width,height,audio,flags))
+    dbcon.commit()
+    dbcur.close()
+
+def insertOrUpdateComment(dbcon,comment,postId,userId):
+    id = comment['id']
+    parentId = comment['parent']
+    up = comment['up']
+    down = comment['down']
+    created = comment['created']
+    content = comment['content']
+
+    dbcur = dbcon.cursor()
+    dbcur.execute("""
+        INSERT INTO comments 
+        (id,postId,parentId,userId,up,down,created,content)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+        ON DUPLICATE KEY UPDATE  up = VALUES(up), down = VALUES(down), created = VALUES(created), content = VALUES(content)
+        """,(id,postId,parentId,userId,up,down,created,content))
+    dbcon.commit()
+    dbcur.close()
+    
+def connectOrUpdateTagToPost(dbcon,tagId,postId,confidence):
+    dbcur = dbcon.cursor()
+    dbcur.execute("""
+        INSERT INTO post_tags
+        (postId,tagId,confidence)
+        VALUES (%s,%s,%s)
+        ON DUPLICATE KEY UPDATE confidence = VALUES(confidence)
+        """,(postId,tagId,confidence))
+    dbcon.commit()
+    dbcur.close()
